@@ -4,48 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keystroke Dynamics Analysis</title>
-    <style>
-        /* Basic styles to get started */
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .input-section {
-            margin: 20px 0;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            margin: 10px 0;
-            padding: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:disabled {
-            background: #ccc;
-        }
-        .status {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
@@ -53,13 +12,13 @@
         <div id="consentSection">
             <h3>Data Collection Consent</h3>
             <p>We collect keystroke timing data to analyze typing patterns.</p>
-            <button onclick="handleConsent()">I Agree</button>
+            <button id="consentButton">I Agree</button>
         </div>
 
         <div id="inputSection" style="display: none;">
             <div class="controls">
-                <button onclick="startRecording()" id="startButton">Start Recording</button>
-                <button onclick="stopRecording()" id="stopButton" disabled>Stop Recording</button>
+                <button id="startButton">Start Recording</button>
+                <button id="stopButton" disabled>Stop Recording</button>
             </div>
             
             <div class="input-section">
@@ -67,8 +26,6 @@
                     id="textInput" 
                     placeholder="Start typing here..." 
                     disabled
-                    onkeydown="handleKeyDown(event)"
-                    onkeyup="handleKeyUp(event)"
                 ></textarea>
             </div>
             
@@ -80,136 +37,43 @@
         </div>
     </div>
 
+    <!-- Load our JavaScript files -->
+    <script src="js/keystrokeCollector.js"></script>
+    <script src="js/ui.js"></script>
+    
     <script>
-        let isRecording = false;
-        let keydownTimes = {};
-        let keyupTimes = {};
-        let lastKeydown = null;
-        let lastKeyup = null;
-        let timingData = {
-            pp: [], // press-press times
-            rr: [], // release-release times
-            pr: [], // press-release times
-            rp: []  // release-press times
-        };
-
-        function handleConsent() {
-            document.getElementById('consentSection').style.display = 'none';
-            document.getElementById('inputSection').style.display = 'block';
-            document.getElementById('textInput').disabled = false;
-            document.getElementById('startButton').disabled = false;
-        }
-
-        function startRecording() {
-            isRecording = true;
-            resetData();
-            document.getElementById('startButton').disabled = true;
-            document.getElementById('stopButton').disabled = false;
-            document.getElementById('textInput').disabled = false;
-            document.getElementById('statusDisplay').innerHTML = 'Recording...';
-        }
-
-        function stopRecording() {
-            isRecording = false;
-            document.getElementById('startButton').disabled = false;
-            document.getElementById('stopButton').disabled = true;
-            document.getElementById('textInput').disabled = true;
-            document.getElementById('statusDisplay').innerHTML = 'Not recording';
+        // Initialize components
+        const collector = new KeystrokeCollector();
+        const ui = new UIManager();
+        
+        // Setup when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            ui.initialize();
             
-            displayResults();
-        }
-
-        function resetData() {
-            keydownTimes = {};
-            keyupTimes = {};
-            lastKeydown = null;
-            lastKeyup = null;
-            timingData = {
-                pp: [],
-                rr: [],
-                pr: [],
-                rp: []
-            };
-        }
-
-        function handleKeyDown(event) {
-            if (!isRecording) return;
+            // Wire up event listeners
+            document.getElementById('consentButton').addEventListener('click', () => {
+                ui.handleConsent();
+            });
             
-            const timestamp = performance.now();
-            const key = event.key;
+            document.getElementById('startButton').addEventListener('click', () => {
+                collector.start();
+                ui.startRecording();
+            });
             
-            keydownTimes[key] = timestamp;
-
-            if (lastKeydown !== null) {
-                const ppTime = timestamp - lastKeydown;
-                if (ppTime > 0) {
-                    timingData.pp.push(ppTime);
-                }
-            }
+            document.getElementById('stopButton').addEventListener('click', () => {
+                const data = collector.stop();
+                ui.stopRecording();
+                ui.displayResults(data);
+            });
             
-            if (lastKeyup !== null) {
-                const rpTime = timestamp - lastKeyup;
-                if (rpTime > 0) {
-                    timingData.rp.push(rpTime);
-                }
-            }
-
-            lastKeydown = timestamp;
-        }
-
-        function handleKeyUp(event) {
-            if (!isRecording) return;
+            document.getElementById('textInput').addEventListener('keydown', (e) => {
+                collector.handleKeyDown(e);
+            });
             
-            const timestamp = performance.now();
-            const key = event.key;
-            
-            keyupTimes[key] = timestamp;
-
-            if (keydownTimes[key]) {
-                const prTime = timestamp - keydownTimes[key];
-                if (prTime > 0) {
-                    timingData.pr.push(prTime);
-                }
-            }
-
-            if (lastKeyup !== null) {
-                const rrTime = timestamp - lastKeyup;
-                if (rrTime > 0) {
-                    timingData.rr.push(rrTime);
-                }
-            }
-
-            lastKeyup = timestamp;
-        }
-
-        function calculateAverage(array) {
-            if (array.length === 0) return 0;
-            return array.reduce((a, b) => a + b, 0) / array.length;
-        }
-
-        function displayResults() {
-            const results = document.getElementById('results');
-            const text = document.getElementById('textInput').value;
-            
-            const averages = {
-                pp: calculateAverage(timingData.pp),
-                rr: calculateAverage(timingData.rr),
-                pr: calculateAverage(timingData.pr),
-                rp: calculateAverage(timingData.rp)
-            };
-
-            const html = `
-                <h3>Results:</h3>
-                <p>Text length: ${text.length} characters</p>
-                <p>Average press-to-press time: ${averages.pp.toFixed(2)}ms</p>
-                <p>Average release-to-release time: ${averages.rr.toFixed(2)}ms</p>
-                <p>Average press-to-release time: ${averages.pr.toFixed(2)}ms</p>
-                <p>Average release-to-press time: ${averages.rp.toFixed(2)}ms</p>
-                <p>Number of keystrokes: ${timingData.pp.length + 1}</p>
-            `;
-
-            results.innerHTML = html;
-        }
+            document.getElementById('textInput').addEventListener('keyup', (e) => {
+                collector.handleKeyUp(e);
+            });
+        });
     </script>
 </body>
 </html>
