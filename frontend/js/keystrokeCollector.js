@@ -21,8 +21,7 @@ class KeystrokeCollector {
 
     stop() {
         this.isRecording = false;
-        const data = this.getTimingData();
-        return data;
+        return this.getTimingData();
     }
 
     resetData() {
@@ -109,5 +108,5 @@ class KeystrokeCollector {
     }
 }
 
-// Make it globally available
+// Make it available globally
 window.KeystrokeCollector = KeystrokeCollector;

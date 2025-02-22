@@ -5,74 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keystroke Dynamics Analysis</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Keystroke Dynamics Analysis</h1>
-        <div id="consentSection">
-            <h3>Data Collection Consent</h3>
-            <p>We collect keystroke timing data to analyze typing patterns.</p>
-            <button id="consentButton">I Agree</button>
+        
+        <div class="controls">
+            <button id="startButton" class="button">Start Recording</button>
+            <button id="stopButton" class="button" disabled>Stop Recording</button>
+            <button id="showGraphsButton" class="button">Show Graphs</button>
         </div>
 
-        <div id="inputSection" style="display: none;">
-            <div class="controls">
-                <button id="startButton">Start Recording</button>
-                <button id="stopButton" disabled>Stop Recording</button>
-            </div>
-            
-            <div class="input-section">
-                <textarea 
-                    id="textInput" 
-                    placeholder="Start typing here..." 
-                    disabled
-                ></textarea>
-            </div>
-            
-            <div class="status" id="statusDisplay">
-                Not recording
-            </div>
+        <div class="input-section">
+            <textarea 
+                id="textInput" 
+                placeholder="Start typing here..." 
+                disabled
+            ></textarea>
+        </div>
 
-            <div id="results"></div>
+        <div id="profileContainer" class="profile-container"></div>
+
+        <div id="graphsContainer" class="graphs-container" style="display: none;">
+            <div class="graph-grid">
+                <div class="graph-card">
+                    <h3>Press-to-Press Timings</h3>
+                    <canvas id="chart-pp"></canvas>
+                </div>
+                <div class="graph-card">
+                    <h3>Press-to-Release Timings</h3>
+                    <canvas id="chart-pr"></canvas>
+                </div>
+                <div class="graph-card">
+                    <h3>Release-to-Release Timings</h3>
+                    <canvas id="chart-rr"></canvas>
+                </div>
+                <div class="graph-card">
+                    <h3>Release-to-Press Timings</h3>
+                    <canvas id="chart-rp"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Load our JavaScript files -->
+    <!-- Load JavaScript files -->
+    <script src="js/api.js"></script>
+    <script src="js/dataProcessor.js"></script>
     <script src="js/keystrokeCollector.js"></script>
     <script src="js/ui.js"></script>
-    
     <script>
-        // Initialize components
-        const collector = new KeystrokeCollector();
-        const ui = new UIManager();
-        
-        // Setup when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            const ui = new UIManager();
             ui.initialize();
-            
-            // Wire up event listeners
-            document.getElementById('consentButton').addEventListener('click', () => {
-                ui.handleConsent();
-            });
-            
-            document.getElementById('startButton').addEventListener('click', () => {
-                collector.start();
-                ui.startRecording();
-            });
-            
-            document.getElementById('stopButton').addEventListener('click', () => {
-                const data = collector.stop();
-                ui.stopRecording();
-                ui.displayResults(data);
-            });
-            
-            document.getElementById('textInput').addEventListener('keydown', (e) => {
-                collector.handleKeyDown(e);
-            });
-            
-            document.getElementById('textInput').addEventListener('keyup', (e) => {
-                collector.handleKeyUp(e);
-            });
         });
     </script>
 </body>
