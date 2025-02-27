@@ -1,5 +1,5 @@
 class KeystrokeAPI {
-    constructor(baseUrl = '/api') {
+    constructor(baseUrl = 'http://localhost:8000/api') {
         this.baseUrl = baseUrl;
     }
 
@@ -17,7 +17,8 @@ class KeystrokeAPI {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            return await response.json();
+            const result = await response.json();
+            return result;
         } catch (error) {
             console.error('Error sending keystroke data:', error);
             throw error;
@@ -25,16 +26,12 @@ class KeystrokeAPI {
     }
 
     async getUserProfile(keystrokeData) {
-        // This is a placeholder - replace with actual API call
-        // In the future, this will call the ML model endpoint
-        return {
-            ageRange: '25-35',
-            handedness: 'Right',
-            typingExperience: 'Advanced',
-            consistency: 'High'
-        };
+        try {
+            const result = await this.sendKeystrokeData(keystrokeData);
+            return result.profile;
+        } catch (error) {
+            console.error('Error getting user profile:', error);
+            throw error;
+        }
     }
 }
-
-// Make it available globally
-window.KeystrokeAPI = KeystrokeAPI;
