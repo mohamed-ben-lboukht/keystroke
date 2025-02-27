@@ -1,7 +1,5 @@
-// api.js
-
 class KeystrokeAPI {
-    constructor(baseUrl = 'http://localhost:8000') {
+    constructor(baseUrl = '/api') {
         this.baseUrl = baseUrl;
     }
 
@@ -26,35 +24,17 @@ class KeystrokeAPI {
         }
     }
 
-    async getAnalysis(sessionId) {
-        try {
-            const response = await fetch(`${this.baseUrl}/analysis/${sessionId}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error getting analysis:', error);
-            throw error;
-        }
-    }
-
-    async getUserProfile(userId) {
-        try {
-            const response = await fetch(`${this.baseUrl}/profile/${userId}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error getting user profile:', error);
-            throw error;
-        }
+    async getUserProfile(keystrokeData) {
+        // This is a placeholder - replace with actual API call
+        // In the future, this will call the ML model endpoint
+        return {
+            ageRange: '25-35',
+            handedness: 'Right',
+            typingExperience: 'Advanced',
+            consistency: 'High'
+        };
     }
 }
 
-export default KeystrokeAPI;
+// Make it available globally
+window.KeystrokeAPI = KeystrokeAPI;
