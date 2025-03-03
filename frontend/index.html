@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keystroke Dynamics Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Keystroke Dynamics Analysis</h1>
+        
+        <div id="statusContainer" class="status-container"></div>
         
         <div class="controls">
             <button id="startButton" class="button">Start Recording</button>
@@ -47,6 +52,12 @@
                 </div>
             </div>
         </div>
+
+        <!-- Debug container for development - can be hidden in production -->
+        <div id="debugContainer" class="debug-container" style="display: none;"></div>
+        <div class="debug-toggle">
+            <button id="toggleDebugButton" class="button button-small">Show Debug Info</button>
+        </div>
     </div>
 
     <!-- Load JavaScript files -->
@@ -58,6 +69,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             const ui = new UIManager();
             ui.initialize();
+            
+            // Toggle debug information (for development)
+            document.getElementById('toggleDebugButton').addEventListener('click', function() {
+                const debugContainer = document.getElementById('debugContainer');
+                const isVisible = debugContainer.style.display !== 'none';
+                debugContainer.style.display = isVisible ? 'none' : 'block';
+                this.textContent = isVisible ? 'Show Debug Info' : 'Hide Debug Info';
+            });
         });
     </script>
 </body>

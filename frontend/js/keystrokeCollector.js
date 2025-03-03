@@ -11,6 +11,8 @@ class KeystrokeCollector {
             pr: [], // press-release times
             rp: []  // release-press times
         };
+        // Scale factor to distribute timings across bins
+        this.SCALE_FACTOR = 1000; // Multiply timings by 1000 to spread across bins
     }
 
     start() {
@@ -46,15 +48,17 @@ class KeystrokeCollector {
         this.keydownTimes[key] = timestamp;
 
         if (this.lastKeydown !== null) {
-            const ppTime = timestamp - this.lastKeydown;
-            if (ppTime > 0) {
+            const ppTime = Math.round((timestamp - this.lastKeydown) * this.SCALE_FACTOR);
+            if (ppTime > -1110000 && ppTime < 57600000) {
+                console.log('PP timing (scaled):', ppTime);
                 this.timingData.pp.push(ppTime);
             }
         }
         
         if (this.lastKeyup !== null) {
-            const rpTime = timestamp - this.lastKeyup;
-            if (rpTime > 0) {
+            const rpTime = Math.round((timestamp - this.lastKeyup) * this.SCALE_FACTOR);
+            if (rpTime > -720000 && rpTime < 58310000) {
+                console.log('RP timing (scaled):', rpTime);
                 this.timingData.rp.push(rpTime);
             }
         }
@@ -71,15 +75,17 @@ class KeystrokeCollector {
         this.keyupTimes[key] = timestamp;
 
         if (this.keydownTimes[key]) {
-            const prTime = timestamp - this.keydownTimes[key];
-            if (prTime > 0) {
+            const prTime = Math.round((timestamp - this.keydownTimes[key]) * this.SCALE_FACTOR);
+            if (prTime > -1880000 && prTime < 57830000) {
+                console.log('PR timing (scaled):', prTime);
                 this.timingData.pr.push(prTime);
             }
         }
 
         if (this.lastKeyup !== null) {
-            const rrTime = timestamp - this.lastKeyup;
-            if (rrTime > 0) {
+            const rrTime = Math.round((timestamp - this.lastKeyup) * this.SCALE_FACTOR);
+            if (rrTime > -1340000 && rrTime < 57120000) {
+                console.log('RR timing (scaled):', rrTime);
                 this.timingData.rr.push(rrTime);
             }
         }

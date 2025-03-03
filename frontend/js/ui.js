@@ -6,7 +6,9 @@ class UIManager {
         this.showGraphsButton = null;
         this.graphsContainer = null;
         this.profileContainer = null;
-        this.api = new KeystrokeAPI();
+        // Pass 'placeholder' to use local placeholder data during development
+        // Change to actual API endpoint when connecting to backend
+        this.api = new KeystrokeAPI('placeholder'); 
         this.collector = new KeystrokeCollector();
         this.processor = new DataProcessor();
     }
@@ -29,6 +31,9 @@ class UIManager {
 
         // Initialize charts
         this.processor.initializeCharts();
+
+        // Display status message
+        this.displayStatus('Ready to capture keystroke data. Click "Start Recording" to begin.');
     }
 
     startRecording() {
@@ -40,6 +45,7 @@ class UIManager {
         this.textInput.focus();
         this.profileContainer.innerHTML = '';
         this.processor.clearCharts();
+        this.displayStatus('Recording keystroke dynamics. Type naturally...');
     }
 
     async stopRecording() {
@@ -47,22 +53,38 @@ class UIManager {
         this.startButton.disabled = false;
         this.stopButton.disabled = true;
         this.textInput.disabled = true;
+        this.displayStatus('Processing data...');
 
-        // Update charts
+        // Update charts with raw timing data
         this.processor.updateCharts(data.timings);
 
-        // Get user profile
+        // Show the data in histogram format
+        this.displayDataDistribution(data.timings);
+
+        // Get user profile predictions
         try {
             const profile = await this.api.getUserProfile(data);
             this.displayProfile(profile);
+            this.displayStatus('Analysis complete.');
         } catch (error) {
             console.error('Error getting user profile:', error);
+            this.displayStatus('Error analyzing keystroke data. Please try again.');
         }
     }
 
     toggleGraphs() {
         const isVisible = this.graphsContainer.style.display !== 'none';
-        this.graphsContainer.style.display = isVisible ? 'none' : 'block';
+        if (isVisible) {
+            this.graphsContainer.style.opacity = '0';
+            setTimeout(() => {
+                this.graphsContainer.style.display = 'none';
+            }, 300); // Match the CSS transition duration
+        } else {
+            this.graphsContainer.style.display = 'block';
+            // Force a reflow
+            this.graphsContainer.offsetHeight;
+            this.graphsContainer.style.opacity = '1';
+        }
         this.showGraphsButton.textContent = isVisible ? 'Show Graphs' : 'Hide Graphs';
     }
 
@@ -90,6 +112,39 @@ class UIManager {
                 </div>
             </div>
         `;
+    }
+
+    displayStatus(message) {
+        const statusElement = document.createElement('div');
+        statusElement.className = 'status-message';
+        statusElement.textContent = message;
+        
+        const statusContainer = document.getElementById('statusContainer');
+        if (statusContainer) {
+            statusContainer.innerHTML = '';
+            statusContainer.appendChild(statusElement);
+        }
+    }
+
+    displayDataDistribution(timingData) {
+        // Create a transformed version of the data for the model
+        const transformedData = this.processor.transformToModelFormat(timingData);
+        
+        // For debugging - log the transformed data
+        console.log("Transformed data:", transformedData);
+        
+        // Optionally, display a visual representation of the histogram
+        // This would be useful for debugging or explaining the transformation
+        const debugElement = document.getElementById('debugContainer');
+        if (debugElement) {
+            debugElement.innerHTML = `
+                <div class="debug-card">
+                    <h3>Data Transformation for ML Model</h3>
+                    <p>Raw keystroke data has been transformed into the following histogram format:</p>
+                    <pre>${JSON.stringify(transformedData, null, 2)}</pre>
+                </div>
+            `;
+        }
     }
 }
 
