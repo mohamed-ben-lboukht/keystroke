@@ -168,4 +168,29 @@ createApp({
                     keystrokes.value = 0;
                     wpm.value = 0;
                     startTime.value = null;
-                    k
+                    Object.keys(keyData).forEach(key => {
+                        if (typeof keyData[key] === 'object') {
+                            keyData[key] = {};
+                        }
+                    });
+                }
+            });
+        }
+
+        return {
+            text,
+            showPredictions,
+            wpm,
+            accuracy,
+            keystrokes,
+            predictions,
+            handleKeydown,
+            handleKeyup,
+            makePredictions,
+            confirmPredictions,
+            redirectToContribute,
+            resetAndRetry,
+            createRipple
+        }
+    }
+}).mount('#app')

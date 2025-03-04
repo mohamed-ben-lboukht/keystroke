@@ -108,4 +108,92 @@
 <body class="overflow-hidden">
     <div id="vanta-bg" class="fixed inset-0 z-0 opacity-50"></div>
     
-    <div id="app" 
+    <div id="app" class="relative z-10">
+        <div class="scroll-container px-4 py-8">
+            <h1 class="text-4xl md:text-6xl font-bold text-center mb-2">
+                <span class="gradient-text">Keystroke Dynamics</span>
+            </h1>
+            <p class="text-gray-400 text-center mb-12">Découvrez votre profil grâce à l'IA</p>
+
+            <div class="max-w-3xl mx-auto">
+                <textarea 
+                    v-model="text"
+                    @keydown="handleKeydown"
+                    @keyup="handleKeyup"
+                    class="w-full h-48 p-4 rounded-lg glass text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    placeholder="Commencez à taper votre texte..."
+                ></textarea>
+
+                <div class="grid grid-cols-3 gap-4 mt-6 mb-12">
+                    <div class="glass rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-blue-400">{{ wpm }}</div>
+                        <div class="text-gray-400 text-sm">Mots/min</div>
+                    </div>
+                    <div class="glass rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-green-400">{{ accuracy }}%</div>
+                        <div class="text-gray-400 text-sm">Précision</div>
+                    </div>
+                    <div class="glass rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-purple-400">{{ keystrokes }}</div>
+                        <div class="text-gray-400 text-sm">Frappes</div>
+                    </div>
+                </div>
+
+                <div v-if="showPredictions" class="results-section" :class="{ 'slide-down': showPredictions, 'slide-up': !showPredictions }">
+                    <h2 class="text-2xl font-bold text-white mb-6 text-center">Prédictions</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div v-for="(pred, key) in predictions" :key="key" class="prediction-card glass rounded-lg p-4">
+                            <div class="text-gray-400 mb-2">{{ pred.label }}</div>
+                            <div class="text-2xl font-bold gradient-text">{{ pred.value || '...' }}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center gap-4 mt-8">
+                        <button @click="confirmPredictions" @mousedown="createRipple" class="relative overflow-hidden px-6 py-2 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors">
+                            Confirmer
+                        </button>
+                        <button @click="redirectToContribute" @mousedown="createRipple" class="relative overflow-hidden px-6 py-2 rounded-lg bg-green-500 text-white font-medium hover:bg-green-600 transition-colors">
+                            Contribuer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-panel glass rounded-lg p-6 text-white">
+            <h3 class="text-xl font-bold mb-4">Aidez-nous à améliorer</h3>
+            <p class="text-gray-400 mb-4">Votre contribution est précieuse pour améliorer notre modèle d'IA.</p>
+            <ul class="space-y-2 text-gray-400">
+                <li>✓ Données anonymisées</li>
+                <li>✓ Amélioration continue</li>
+                <li>✓ Impact direct</li>
+            </ul>
+            <button @click="redirectToContribute" @mousedown="createRipple" class="relative overflow-hidden w-full mt-6 px-4 py-2 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors">
+                Contribuer
+            </button>
+        </div>
+
+        <button v-if="showPredictions" @click="resetAndRetry" class="retry-button px-6 py-2 rounded-lg bg-gray-700 text-white font-medium hover:bg-gray-600 transition-colors">
+            Réessayer
+        </button>
+    </div>
+
+    <script>
+        const vantaConfig = {
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x3b82f6,
+            backgroundColor: 0x0f172a,
+            points: 20.00,
+            maxDistance: 25.00,
+            spacing: 15.00
+        }
+    </script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
