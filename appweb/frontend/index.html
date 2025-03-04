@@ -9,8 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="js/keystrokeCollector.js"></script>
+    <script src="js/keystrokeProcessor.js"></script>
     <style>
-        body { 
+        body {
             font-family: 'Space Grotesk', sans-serif;
             background: #0f172a;
             min-height: 100vh;
@@ -103,6 +105,27 @@
         .retry-button:hover {
             transform: translateX(-50%) translateY(-2px);
         }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .debug-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body class="overflow-hidden">
@@ -114,7 +137,7 @@
                 <span class="gradient-text">Keystroke Dynamics</span>
             </h1>
             <p class="text-gray-400 text-center mb-12">Découvrez votre profil grâce à l'IA</p>
-
+            
             <div class="max-w-3xl mx-auto">
                 <textarea 
                     v-model="text"
@@ -123,7 +146,7 @@
                     class="w-full h-48 p-4 rounded-lg glass text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Commencez à taper votre texte..."
                 ></textarea>
-
+                
                 <div class="grid grid-cols-3 gap-4 mt-6 mb-12">
                     <div class="glass rounded-lg p-4 text-center">
                         <div class="text-3xl font-bold text-blue-400">{{ wpm }}</div>
@@ -177,6 +200,8 @@
         </button>
     </div>
 
+    <button class="debug-toggle" onclick="toggleDebug()">Debug Mode</button>
+
     <script>
         const vantaConfig = {
             el: "#vanta-bg",
@@ -192,6 +217,13 @@
             points: 20.00,
             maxDistance: 25.00,
             spacing: 15.00
+        }
+
+        function toggleDebug() {
+            const debugContainer = document.getElementById('debug-container');
+            if (debugContainer) {
+                debugContainer.style.display = debugContainer.style.display === 'none' ? 'block' : 'none';
+            }
         }
     </script>
     <script src="js/app.js"></script>

@@ -28,21 +28,45 @@ createApp({
             // Configuration VANTA optimisée
             vantaEffect = VANTA.NET(vantaConfig)
 
+            // Get the textarea element
+            const textarea = document.querySelector('textarea');
+            if (textarea) {
+                // Start recording when textarea is focused
+                textarea.addEventListener('focus', () => {
+                    console.log('Starting keystroke collection...');
+                    keystrokeCollector.start();
+                });
+
+                // Stop recording when textarea is blurred
+                textarea.addEventListener('blur', () => {
+                    console.log('Stopping keystroke collection...');
+                    keystrokeCollector.stop();
+                });
+            }
+
             // Nettoyage à la destruction du composant
             return () => {
                 if (vantaEffect) vantaEffect.destroy()
             }
         })
 
+        // Initialize keystroke collector and processor
+        const keystrokeCollector = new KeystrokeCollector();
+        const keystrokeProcessor = new KeystrokeProcessor(true); // Enable debug mode
+
         function handleKeydown(e) {
+            if (!startTime.value) startTime.value = Date.now()
+            
             if (e.key === 'Enter') {
                 e.preventDefault()
+                console.log('Enter key pressed, making predictions...');
                 makePredictions()
                 return
             }
 
-            if (!startTime.value) startTime.value = Date.now()
-            
+            // Process keystroke data
+            keystrokeCollector.handleKeyDown(e);
+
             const key = e.key
             const time = performance.now()
             keyData.pressTimestamps[key] = time
@@ -61,6 +85,9 @@ createApp({
         }
 
         function handleKeyup(e) {
+            // Process keystroke data
+            keystrokeCollector.handleKeyUp(e);
+
             const key = e.key
             const time = performance.now()
             keyData.releaseTimestamps[key] = time
@@ -88,38 +115,35 @@ createApp({
         }
 
         async function makePredictions() {
+            console.log('Making predictions...');
             showPredictions.value = true
             
-            // Scroll vers les résultats
-            setTimeout(() => {
-                document.querySelector('.results-section').scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 300);
-
             try {
-                const response = await fetch('http://localhost:8000/api/keystrokes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text_content: text.value,
-                        keystroke_data: keyData
-                    })
-                })
+                // Get the timing data from collector
+                const timingData = keystrokeCollector.getTimingData();
+                console.log('Timing data:', timingData);
+                
+                // Process the timing data with visualization
+                const processedData = keystrokeProcessor.processTimingData(timingData.timings);
+                console.log('Processed data:', processedData);
+                
+                // Prepare the data for API
+                const data = {
+                    text_content: text.value,
+                    timing_data: processedData,
+                    user_info: {}
+                };
 
-                if (!response.ok) throw new Error('Erreur serveur')
-
-                const data = await response.json()
-                animatePredictions(data.predictions)
-            } catch (error) {
-                console.error('Erreur:', error)
+                // For now, just use mock predictions for testing
+                console.log('Using mock predictions for testing');
                 animatePredictions({
                     age: Math.floor(Math.random() * 42 + 18),
                     handedness: Math.random() > 0.5 ? "Droitier" : "Gaucher",
                     gender: Math.random() > 0.5 ? "Homme" : "Femme",
                     class: ["Étudiant", "Professeur", "Ingénieur"][Math.floor(Math.random() * 3)]
-                })
+                });
+            } catch (error) {
+                console.error('Error making predictions:', error);
             }
         }
 
@@ -177,6 +201,20 @@ createApp({
             });
         }
 
+        // Function to display results
+        function displayResults(predictions) {
+            const resultsDiv = document.getElementById('results');
+            if (resultsDiv) {
+                resultsDiv.innerHTML = `
+                    <h3>Predictions:</h3>
+                    <p>Age: ${predictions.age}</p>
+                    <p>Handedness: ${predictions.handedness}</p>
+                    <p>Gender: ${predictions.gender}</p>
+                    <p>Class: ${predictions.class}</p>
+                `;
+            }
+        }
+
         return {
             text,
             showPredictions,
@@ -194,3 +232,20 @@ createApp({
         }
     }
 }).mount('#app')
+
+// Add form submit listener
+const form = document.querySelector('form');
+if (form) {
+    form.addEventListener('submit', handleSubmit);
+}
+
+// Optional: Add a clear button
+const clearButton = document.getElementById('clear-button');
+if (clearButton) {
+    clearButton.addEventListener('click', () => {
+        if (textarea) {
+            textarea.value = '';
+        }
+        keystrokeCollector.resetData();
+    });
+}
