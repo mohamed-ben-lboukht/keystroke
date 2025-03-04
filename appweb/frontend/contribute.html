@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Contribution - Keystroke Dynamics</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <style>
+        body { 
+            background: #0B1221;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: white;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
+            color: #67E8F9;
+            font-size: 32px;
+            text-align: center;
+            margin: 40px 0;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94A3B8;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #67E8F9;
+        }
+
+        .text-area {
+            height: 150px;
+            resize: none;
+        }
+
+        .text-to-copy {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #94A3B8;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            color: #94A3B8;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+
+        .back-button:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="vanta-bg" class="fixed inset-0 z-0"></div>
+    
+    <div id="app" class="relative z-10">
+        <div class="container">
+            <a href="index.html" class="back-button">← Retour</a>
+            
+            <h1 class="title">Contribution à la recherche</h1>
+
+            <div class="text-to-copy">
+                <p>Veuillez recopier le texte suivant :</p>
+                <p class="mt-2">"Le petit chat dort paisiblement sur le canapé pendant que le soleil brille à travers la fenêtre."</p>
+            </div>
+
+            <form @submit.prevent="submitContribution">
+                <div class="form-group">
+                    <textarea 
+                        class="form-input text-area"
+                        v-model="text"
+                        placeholder="Recopiez le texte ici..."
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">Âge</label>
+                        <input type="number" v-model="userData.age" required
+                            class="form-input" min="18" max="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Main dominante</label>
+                        <select v-model="userData.handedness" required class="form-input">
+                            <option value="" disabled selected>Sélectionnez...</option>
+                            <option value="droitier">Droitier</option>
+                            <option value="gaucher">Gaucher</option>
+                            <option value="ambidextre">Ambidextre</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Genre</label>
+                        <select v-model="userData.gender" required class="form-input">
+                            <option value="" disabled selected>Sélectionnez...</option>
+                            <option value="homme">Homme</option>
+                            <option value="femme">Femme</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Profession</label>
+                        <select v-model="userData.profession" required class="form-input">
+                            <option value="" disabled selected>Sélectionnez...</option>
+                            <option value="etudiant">Étudiant</option>
+                            <option value="professeur">Professeur</option>
+                            <option value="ingenieur">Ingénieur</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button type="submit" 
+                        class="px-8 py-3 bg-[#67E8F9] hover:bg-[#22D3EE] text-gray-900 font-medium rounded-lg transition-
