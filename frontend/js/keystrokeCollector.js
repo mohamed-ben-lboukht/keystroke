@@ -11,8 +11,8 @@ class KeystrokeCollector {
             pr: [], // press-release times
             rp: []  // release-press times
         };
-        // Scale factor to distribute timings across bins
-        this.SCALE_FACTOR = 1000; // Multiply timings by 1000 to spread across bins
+        // Scale factor to distribute timings across bins (needed for model compatibility)
+        this.SCALE_FACTOR = 1000;
     }
 
     start() {
@@ -48,18 +48,20 @@ class KeystrokeCollector {
         this.keydownTimes[key] = timestamp;
 
         if (this.lastKeydown !== null) {
-            const ppTime = Math.round((timestamp - this.lastKeydown) * this.SCALE_FACTOR);
-            if (ppTime > -1110000 && ppTime < 57600000) {
-                console.log('PP timing (scaled):', ppTime);
-                this.timingData.pp.push(ppTime);
+            const ppTimeMs = Math.round(timestamp - this.lastKeydown);
+            const ppTimeScaled = Math.round(ppTimeMs * this.SCALE_FACTOR);
+            if (ppTimeMs > 0 && ppTimeMs < 2000) { // Reasonable range for typing (0-2 seconds)
+                console.log('PP timing (ms):', ppTimeMs, 'scaled:', ppTimeScaled);
+                this.timingData.pp.push(ppTimeScaled);
             }
         }
         
         if (this.lastKeyup !== null) {
-            const rpTime = Math.round((timestamp - this.lastKeyup) * this.SCALE_FACTOR);
-            if (rpTime > -720000 && rpTime < 58310000) {
-                console.log('RP timing (scaled):', rpTime);
-                this.timingData.rp.push(rpTime);
+            const rpTimeMs = Math.round(timestamp - this.lastKeyup);
+            const rpTimeScaled = Math.round(rpTimeMs * this.SCALE_FACTOR);
+            if (rpTimeMs > 0 && rpTimeMs < 2000) {
+                console.log('RP timing (ms):', rpTimeMs, 'scaled:', rpTimeScaled);
+                this.timingData.rp.push(rpTimeScaled);
             }
         }
 
@@ -75,18 +77,20 @@ class KeystrokeCollector {
         this.keyupTimes[key] = timestamp;
 
         if (this.keydownTimes[key]) {
-            const prTime = Math.round((timestamp - this.keydownTimes[key]) * this.SCALE_FACTOR);
-            if (prTime > -1880000 && prTime < 57830000) {
-                console.log('PR timing (scaled):', prTime);
-                this.timingData.pr.push(prTime);
+            const prTimeMs = Math.round(timestamp - this.keydownTimes[key]);
+            const prTimeScaled = Math.round(prTimeMs * this.SCALE_FACTOR);
+            if (prTimeMs > 0 && prTimeMs < 1000) { // Key hold time usually < 1 second
+                console.log('PR timing (ms):', prTimeMs, 'scaled:', prTimeScaled);
+                this.timingData.pr.push(prTimeScaled);
             }
         }
 
         if (this.lastKeyup !== null) {
-            const rrTime = Math.round((timestamp - this.lastKeyup) * this.SCALE_FACTOR);
-            if (rrTime > -1340000 && rrTime < 57120000) {
-                console.log('RR timing (scaled):', rrTime);
-                this.timingData.rr.push(rrTime);
+            const rrTimeMs = Math.round(timestamp - this.lastKeyup);
+            const rrTimeScaled = Math.round(rrTimeMs * this.SCALE_FACTOR);
+            if (rrTimeMs > 0 && rrTimeMs < 2000) {
+                console.log('RR timing (ms):', rrTimeMs, 'scaled:', rrTimeScaled);
+                this.timingData.rr.push(rrTimeScaled);
             }
         }
 
@@ -99,10 +103,10 @@ class KeystrokeCollector {
             metadata: {
                 totalKeystrokes: this.timingData.pp.length + 1,
                 averages: {
-                    pp: this.calculateAverage(this.timingData.pp),
-                    rr: this.calculateAverage(this.timingData.rr),
-                    pr: this.calculateAverage(this.timingData.pr),
-                    rp: this.calculateAverage(this.timingData.rp)
+                    pp: this.calculateAverage(this.timingData.pp) / this.SCALE_FACTOR, // Convert back to ms for display
+                    rr: this.calculateAverage(this.timingData.rr) / this.SCALE_FACTOR,
+                    pr: this.calculateAverage(this.timingData.pr) / this.SCALE_FACTOR,
+                    rp: this.calculateAverage(this.timingData.rp) / this.SCALE_FACTOR
                 }
             }
         };
