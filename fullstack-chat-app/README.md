@@ -34,7 +34,7 @@ A modern chat application built with the MERN stack, featuring real-time messagi
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/fullstack-chat-app.git
+git clone https://github.com/mohamed-ben-lboukht/fullstack-chat-app.git
 cd fullstack-chat-app
 ```
 
